@@ -1,0 +1,43 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import root_mean_squared_error
+
+
+def car_price_analysis(filename: str) -> None:
+    df = pd.read_csv(filename)
+
+    features = [
+        "Year",
+        "Engine HP",
+        "Engine Cylinders",
+        "highway MPG",
+        "city mpg",
+        "Popularity"
+    ]
+
+    target = "MSRP"
+
+    df[features] = df[features].fillna(df[features].mean())
+
+    X = df[features]
+    y = df[target]
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.25, random_state=42
+    )
+
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    y_pred = model.predict(X_test)
+    rmse_model = root_mean_squared_error(y_test, y_pred)
+
+    mean_price = y_train.mean()
+    dumb_predictions = np.full(shape=len(y_test), fill_value=mean_price)
+    rmse_dumb = root_mean_squared_error(y_test, dumb_predictions)
+
+    print(f"RMSE линейной регрессии: {rmse_model}")
+    print(f"RMSE глупой модели: {rmse_dumb}")
+    print(f"Разница RMSE: {rmse_dumb - rmse_model}")
